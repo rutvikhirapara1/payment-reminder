@@ -1,20 +1,25 @@
-# PayTrack — Vendor Payment Due Tracking System
+# PayTrack — shared vendor payment workspace
 
-A Next.js 15 + TypeScript + Tailwind + Prisma starter based on the supplied Version 1 SRS.
+Next.js 15 + TypeScript + Prisma + PostgreSQL. The demo seed records have been removed. Users share one company workspace.
+
+## Features in this build
+- Registration and login with bcrypt password hashing and HTTP-only session cookies.
+- First registered user becomes ADMIN; subsequent self-registrations become ACCOUNTS.
+- VIEWER is read-only at the API layer (role assignment/user administration still needs an admin workflow).
+- PostgreSQL-backed vendors, purchase obligations, and partial payments.
+- Dashboard totals are calculated from database records.
 
 ## Run locally
-1. Install Node.js 20+ and PostgreSQL.
-2. Copy `.env.example` to `.env` and set `DATABASE_URL` and `AUTH_SECRET`.
-3. Run `npm install`
-4. Run `npx prisma generate`
-5. Run `npx prisma db push`
-6. Run `npm run dev` and open http://localhost:3000
+1. Install Node.js 20+.
+2. Copy `.env.example` to `.env` and set `DATABASE_URL` to a PostgreSQL connection string.
+3. Run `npm install`.
+4. Run `npx prisma generate` and `npx prisma db push`.
+5. Run `npm run dev` and open http://localhost:3000.
 
-## Included
-- Responsive dashboard, vendor list, payment obligations, reports and settings UI
-- Demo interactions: add vendors, create obligations, record partial payments, deactivate vendors, CSV export
-- Due date, balance and due-status calculations in the UI
-- Prisma data model for users, vendors, obligations, payments, audit logs and settings
+The first person to register becomes the administrator. Keep the registration URL private while creating the first account. Do not commit `.env` or publish database credentials.
 
-## Important production work
-The included UI is a functional front-end demo using in-memory sample data (today is fixed to 30-Sep-2026 for reproducible preview). It is not production-ready financial software. Before deployment, connect server actions/route handlers to Prisma, implement secure authentication and role checks, persist all writes, implement audit logging, server-side validation and transactional overpayment prevention, and add tested Excel import/export. Do not expose this demo as a live accounts system until these are complete. No email, SMS, WhatsApp, push notifications, or cron jobs are included, per the SRS.
+## Deploy to Vercel
+Import the repository, set `DATABASE_URL` in Project → Settings → Environment Variables, then deploy. Ensure the database allows connections from your deployment. Run `npx prisma db push` against the production database before using the app (or configure a migration workflow).
+
+## Known limitations
+This is a functional starter, not a finished audited accounting system. User invitation/role management, vendor editing/deactivation, audit log UI, reports/export, CSRF hardening, rate limiting, and automated tests are not included. Test with non-production data before business use.

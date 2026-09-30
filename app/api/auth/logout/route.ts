@@ -1,0 +1,2 @@
+import {NextResponse} from 'next/server';import {cookies} from 'next/headers';import {db} from '@/lib/db';import {hashToken} from '@/lib/auth';
+export async function POST(){const jar=await cookies();const token=jar.get('paytrack_session')?.value;if(token)await db.session.deleteMany({where:{tokenHash:hashToken(token)}});const r=NextResponse.json({ok:true});r.cookies.set('paytrack_session','',{path:'/',maxAge:0});return r;}
