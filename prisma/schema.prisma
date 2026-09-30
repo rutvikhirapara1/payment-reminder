@@ -1,0 +1,11 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+enum Role { ADMIN ACCOUNTS VIEWER }
+enum RecordStatus { ACTIVE INACTIVE }
+enum PaymentMethod { BANK_TRANSFER NEFT RTGS IMPS UPI CHEQUE CASH OTHER }
+model User { id String @id @default(cuid()); name String; email String @unique; passwordHash String; role Role @default(ACCOUNTS); status RecordStatus @default(ACTIVE); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; vendorPayments VendorPayment[]; payments Payment[]; auditLogs AuditLog[] }
+model Vendor { id String @id @default(cuid()); vendorCode String @unique; vendorName String; defaultCreditPeriod Int?; status RecordStatus @default(ACTIVE); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; vendorPayments VendorPayment[]; @@index([vendorName]); @@index([status]) }
+model VendorPayment { id String @id @default(cuid()); vendorId String; poId String; poDate DateTime; creditPeriodDays Int; dueDate DateTime; poAmount Decimal @db.Decimal(14,2); notes String?; createdBy String; createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; vendor Vendor @relation(fields:[vendorId],references:[id]); creator User @relation(fields:[createdBy],references:[id]); payments Payment[]; @@unique([vendorId,poId]); @@index([dueDate]); @@index([poDate]); @@index([vendorId]) }
+model Payment { id String @id @default(cuid()); vendorPaymentId String; paymentDate DateTime; amount Decimal @db.Decimal(14,2); paymentMethod PaymentMethod; transactionReference String?; notes String?; createdBy String; createdAt DateTime @default(now()); vendorPayment VendorPayment @relation(fields:[vendorPaymentId],references:[id]); creator User @relation(fields:[createdBy],references:[id]); @@index([vendorPaymentId]) }
+model AuditLog { id String @id @default(cuid()); userId String; module String; recordId String; action String; oldData Json?; newData Json?; createdAt DateTime @default(now()); user User @relation(fields:[userId],references:[id]) }
+model Settings { id String @id @default("default"); companyName String @default("Your Company"); currency String @default("INR"); timezone String @default("Asia/Kolkata"); dueSoonDays Int @default(7); dateFormat String @default("DD-MMM-YYYY"); updatedAt DateTime @updatedAt }
